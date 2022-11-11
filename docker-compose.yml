@@ -1,0 +1,51 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    volumes:
+        - postgres_data:/var/lib/postgresql/data/
+    environment:
+        PGDATA: /var/lib/postgresql/data/pgdata
+    env_file:
+      - ./.env.local
+    ports:
+        - "5423:5432"
+
+  redis:
+    image: redis
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  user_service:
+    build: 
+      context: .
+      dockerfile: user_service.Dockerfile
+    volumes:
+      - ./:/app
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./.env.local
+    restart: always
+    depends_on:
+      - db
+      - redis
+
+  transaction_service:
+    build: 
+      context: .
+      dockerfile: transaction_service.Dockerfile
+    volumes:
+      - .:/app
+    env_file:
+      - ./.env.local
+    restart: always
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
