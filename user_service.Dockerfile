@@ -5,13 +5,6 @@ EXPOSE 8080
 RUN mkdir /app
 WORKDIR /app
 
-# RUN apt update && apt upgrade -y && \
-#     apt install -y git \
-#     make openssh-client
-
-# RUN curl -fLo install.sh https://raw.githubusercontent.com/cosmtrek/air/master/install.sh \
-#     && chmod +x install.sh && sh install.sh && cp ./bin/air /bin/air
-
 COPY ./wait-for-it.sh ./wait-for-it.sh
 
 CMD \
@@ -21,4 +14,3 @@ CMD \
     --timeout=25 -- \
     ls -la ./user_service && \
     ./build/user_service_main
-    # air
