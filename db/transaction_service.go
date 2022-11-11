@@ -19,8 +19,6 @@ func (s TransactionService) Create(ctx context.Context, newTx TransactionCreateD
 	var balanceId int
 	var balanceAmount int
 
-	fmt.Printf("Handle tx: %v", newTx)
-
 	query := `
 		INSERT INTO transaction(user_id, amount, tx_type) 
 		VALUES ($1,$2,$3)
@@ -31,7 +29,6 @@ func (s TransactionService) Create(ctx context.Context, newTx TransactionCreateD
 	if err != nil {
 		return Transaction{}, err
 	}
-	fmt.Printf("tx created: %v\n", createdTx)
 
 	dbTx, err := s.dbConn.BeginTx(ctx, nil)
 	if err != nil {
@@ -65,7 +62,6 @@ func (s TransactionService) Create(ctx context.Context, newTx TransactionCreateD
 	if balanceAmount < 0 {
 		return Transaction{}, fmt.Errorf("Balance cannot be less than 0")
 	}
-	fmt.Println("balance ok")
 
 	query = `
 		INSERT INTO hold(transaction_id, balance_id, amount, tx_type)
@@ -75,12 +71,10 @@ func (s TransactionService) Create(ctx context.Context, newTx TransactionCreateD
 	if err != nil {
 		return Transaction{}, err
 	}
-	fmt.Println("hold ok")
 
 	if err = dbTx.Commit(); err != nil {
 		return Transaction{}, err
 	}
-	fmt.Println("commit ok")
 
 	return createdTx, nil
 }

@@ -46,13 +46,10 @@ func transactionProcess() {
 		for _, user := range users {
 			userIds = append(userIds, user.Id)
 		}
-		fmt.Printf("Read queues for users %v\n", users)
 		err = queueService.GetUsersTxs(context, userIds)
 		if err != nil {
-			re, ok := err.(*queue.QueueReadTimeoutError)
-			if ok {
-				fmt.Printf("No new messages: %v\n", re.Error())
-			} else {
+			_, ok := err.(*queue.QueueReadTimeoutError)
+			if !ok {
 				log.Fatal(err)
 			}
 		}

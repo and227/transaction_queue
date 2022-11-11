@@ -53,9 +53,8 @@ func (s QueueService) handleMessage(ctx context.Context, msg redis.XMessage) err
 		return fmt.Errorf("Need to initialize hold service")
 	}
 
-	fmt.Printf("handle message %v\n", msg)
+	log.Printf("handle message %v\n", msg)
 	isTxConfirmed := true
-	fmt.Printf("id type: %T\n", msg.Values["id"])
 	txIdField, ok := msg.Values["id"].(string)
 	if !ok {
 		return fmt.Errorf("Cannot decode message value")
@@ -80,7 +79,6 @@ func (s QueueService) GetUsersTxs(ctx context.Context, userIds []int) error {
 	for i := 0; i < len(userIds); i++ {
 		streams = append(streams, "0")
 	}
-	log.Printf("watch streams %v", streams)
 	xreadSlice := s.redisClient.XRead(ctx, &redis.XReadArgs{
 		Streams: streams,
 		Count:   1,
@@ -91,11 +89,8 @@ func (s QueueService) GetUsersTxs(ctx context.Context, userIds []int) error {
 
 		return &QueueReadTimeoutError{}
 	}
-	log.Printf("XREAD result: %v\n", result)
 	for _, stream := range result {
-		log.Printf("stream: %v", stream)
 		for _, message := range stream.Messages {
-			log.Printf("message: %v", message)
 			if err := s.handleMessage(ctx, message); err != nil {
 				log.Printf("error in handle message %v: %s\n", message, err.Error())
 			} else {
@@ -108,7 +103,6 @@ func (s QueueService) GetUsersTxs(ctx context.Context, userIds []int) error {
 			}
 		}
 	}
-	log.Println("messages ok")
 
 	return nil
 }
