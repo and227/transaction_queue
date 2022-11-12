@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"transaction_queue/db"
 	"transaction_queue/queue"
@@ -14,7 +15,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "transaction_queue/docs"
 )
+
+// @title       Simple transaction queue
+// @version     1.0
+// @description Simple transaction queue
+// @host        localhost:8080
+// @BasePath    /
 
 var (
 	dbDriver           string
@@ -32,6 +43,15 @@ func init() {
 	redisHost, redisPort, redisDb = utils.GetRedisParams()
 }
 
+// @Summary     create new transaction
+// @Tags        transaction
+// @ID          create-transaction
+// @Accept      json
+// @Produce     json
+// @Param       input body     db.TransactionCreateDTO true "transaction info"
+// @Success     200   {object} db.Transaction
+// @Failure 	400,500 {object} gin.H  "error response"
+// @Router      /transactions [post]
 func transactionHandler(c *gin.Context) {
 	var transactionRequest db.TransactionCreateDTO
 
@@ -53,6 +73,15 @@ func transactionHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, transaction)
 }
 
+// @Summary     create new user
+// @Tags        user
+// @ID          create-user
+// @Accept      json
+// @Produce     json
+// @Param       input body     db.UserCreateDTO true "user info"
+// @Success     200   {object} db.User
+// @Failure 	400,500 {object} gin.H  "error response"
+// @Router      /users [post]
 func userHandler(c *gin.Context) {
 	var userRequest db.UserCreateDTO
 
@@ -70,6 +99,31 @@ func userHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, user)
+}
+
+// @Summary     get user with balance
+// @Tags        user
+// @ID          get-user
+// @Accept      json
+// @Produce     json
+// @Param       user_id path int true "user id"
+// @Success     200 {object} db.UserWithBalanceOutDTO
+// @Failure 	400,500 {object} gin.H  "error response"
+// @Router      /users/{user_id} [get]
+func userWithBalanceGet(c *gin.Context) {
+	userId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userWithBalance, err := userService.GetUserWithBalance(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, userWithBalance)
 }
 
 func main() {
@@ -93,5 +147,8 @@ func main() {
 	fmt.Println("Start server")
 	router.POST("transactions", transactionHandler)
 	router.POST("users", userHandler)
+	router.GET("users/:id", userWithBalanceGet)
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	router.Run(":8080")
 }

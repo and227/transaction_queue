@@ -70,3 +70,27 @@ func (s UserService) GetAll() ([]User, error) {
 
 	return users, nil
 }
+
+func (s UserService) GetUserWithBalance(userId int) (UserWithBalanceOutDTO, error) {
+	var (
+		userWithBalance UserWithBalanceOutDTO
+	)
+
+	query := `
+		SELECT u.id, u.name, b.id, b.amount FROM "user" u
+		JOIN balance b ON u.id = b.user_id
+		WHERE u.id = $1
+	`
+	err := s.dbConn.QueryRow(query, userId).
+		Scan(
+			&userWithBalance.Id,
+			&userWithBalance.Name,
+			&userWithBalance.Balance.Id,
+			&userWithBalance.Balance.Amount,
+		)
+	if err != nil {
+		return UserWithBalanceOutDTO{}, err
+	}
+
+	return userWithBalance, nil
+}

@@ -15,6 +15,11 @@ type Balance struct {
 	Amount int64
 }
 
+type BalanceOutDTO struct {
+	Id     int   `json:"id" binding:"required"`
+	Amount int64 `json:"amount" binding:"required"`
+}
+
 type Hold struct {
 	Id            int
 	TransactionId int
@@ -34,4 +39,10 @@ type TransactionCreateDTO struct {
 	UserId int             `json:"user_id" binding:"required"`
 	Amount int             `json:"amount" binding:"required"`
 	Type   TransactionType `json:"type" binding:"required"`
+}
+
+type UserWithBalanceOutDTO struct {
+	Id      int           `json:"id" binding:"required"`
+	Name    string        `json:"name" binding:"required"`
+	Balance BalanceOutDTO `json:"balance" binding:"required"`
 }

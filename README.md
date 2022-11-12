@@ -2,7 +2,7 @@
 
 1. build executable
 ```
-go build -o build/transaction_service_main user_service/main.go
+go build -o build/user_service_main user_service/main.go
 go build -o build/transaction_service_main transaction_service/main.go
 ```
 2. up containers
@@ -31,4 +31,11 @@ http://localhost:8080/transactions
     "amount": 2000,
     "type": "withdraw"
 }
+```
+7. Generate swagger docs
+```bash
+cd user_service
+swag init -g user_service/main.go --parseDependency
+# swagger docs url
+http://localhost:8080/swagger/index.html
 ```

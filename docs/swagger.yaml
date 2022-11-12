@@ -1,0 +1,162 @@
+basePath: /
+definitions:
+  db.BalanceOutDTO:
+    properties:
+      amount:
+        type: integer
+      id:
+        type: integer
+    required:
+    - amount
+    - id
+    type: object
+  db.Transaction:
+    properties:
+      amount:
+        type: integer
+      id:
+        type: integer
+      type:
+        type: string
+      userId:
+        type: integer
+    type: object
+  db.TransactionCreateDTO:
+    properties:
+      amount:
+        type: integer
+      type:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - amount
+    - type
+    - user_id
+    type: object
+  db.User:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  db.UserCreateDTO:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  db.UserWithBalanceOutDTO:
+    properties:
+      balance:
+        $ref: '#/definitions/db.BalanceOutDTO'
+      id:
+        type: integer
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  gin.H:
+    additionalProperties: {}
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Simple transaction queue
+  title: Simple transaction queue
+  version: "1.0"
+paths:
+  /transactions:
+    post:
+      consumes:
+      - application/json
+      operationId: create-transaction
+      parameters:
+      - description: transaction info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/db.TransactionCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Transaction'
+        "400":
+          description: error response
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error response
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: create new transaction
+      tags:
+      - transaction
+  /users:
+    post:
+      consumes:
+      - application/json
+      operationId: create-user
+      parameters:
+      - description: user info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/db.UserCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.User'
+        "400":
+          description: error response
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error response
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: create new user
+      tags:
+      - user
+  /users/{user_id}:
+    get:
+      consumes:
+      - application/json
+      operationId: get-user
+      parameters:
+      - description: user id
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.UserWithBalanceOutDTO'
+        "400":
+          description: error response
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: error response
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: get user with balance
+      tags:
+      - user
+swagger: "2.0"
